@@ -4,7 +4,7 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface TurretIO {
     @AutoLog
-    public static class TurretIOInputs {
+    class TurretIOInputs {
         public double turretRad;
         public double turretRadPerSec;
 

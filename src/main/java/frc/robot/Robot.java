@@ -21,6 +21,15 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import edu.wpi.first.hal.simulation.RoboRioDataJNI;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Subsystems.Turret.TurretIOReal;
+import frc.robot.Subsystems.Turret.TurretIOSim;
+import frc.robot.Subsystems.Turret.TurretSubsystem;
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -28,11 +37,26 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  * project.
  */
 public class Robot extends LoggedRobot {
+
+  public static enum RobotMode {
+    SIM,
+    REPLAY,
+    REAL
+  }
+
   private static final String defaultAuto = "Default";
   private static final String customAuto = "My Auto";
   private String autoSelected;
-  private final LoggedDashboardChooser<String> chooser =
+  private Command autonomousCommand;
+  private final LoggedDashboardChooser<Command> chooser =
       new LoggedDashboardChooser<>("Auto Choices");
+
+  public final static CommandXboxController m_driverController = new CommandXboxController(0);
+  public final static CommandXboxController gunner = new CommandXboxController(1);
+
+  public static final RobotMode mode = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
+
+  private final TurretSubsystem m_turret = new TurretSubsystem(mode == RobotMode.REAL ? new TurretIOReal() : new TurretIOSim());
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -40,7 +64,11 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void robotInit() {
-    // Record metadata
+    RoboRioDataJNI.setBrownoutVoltage(6.0);
+    // Metadata about the current code running on the robot
+    Logger.recordMetadata("Codebase", "Comp2024");
+    Logger.recordMetadata("RuntimeType", getRuntimeType().toString());
+    Logger.recordMetadata("Robot Mode", mode.toString());
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
@@ -63,7 +91,7 @@ public class Robot extends LoggedRobot {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
-        Logger.addDataReceiver(new NT4Publisher());
+        Logger.addDataReceiver(new NT4Publisher()); // Do we want no logs during match?
         break;
 
       case SIM:
@@ -87,19 +115,42 @@ public class Robot extends LoggedRobot {
     Logger.start();
 
     // Initialize auto chooser
-    chooser.addDefaultOption("Default Auto", defaultAuto);
-    chooser.addOption("My Auto", customAuto);
+    // chooser.addDefaultOption("Default Auto", defaultAuto);
+    // chooser.addOption("My Auto", customAuto);
+
+    chooser.addOption("None", Commands.none());
+
+    // Default Commands
+    m_turret.setDefaultCommand(m_turret.setAngleCommand(0));
+
+    // State based triggers
+
+    // -- Controller button bindings --
+    // does the commands when each button is pressed
+    m_driverController.a().onTrue(m_turret.randomCommand()); // x y a b 
+    m_driverController.x().onTrue(m_turret.leftCommand());
+    m_driverController.y().onTrue(m_turret.zeroCommand());
+    m_driverController.b().onTrue(m_turret.rightCommand()); 
+    
+    // Auto Chooser Here. 
   }
 
   /** This function is called periodically during all modes. */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    CommandScheduler.getInstance().run();
+
+    // CAN LOG MECHANISM DATA HERE!S
+  }
 
   /** This function is called once when autonomous is enabled. */
   @Override
   public void autonomousInit() {
-    autoSelected = chooser.get();
-    System.out.println("Auto selected: " + autoSelected);
+    autonomousCommand = chooser.get();
+
+    if (autonomousCommand != null) {
+      autonomousCommand.schedule();
+    }
   }
 
   /** This function is called periodically during autonomous. */
@@ -118,7 +169,11 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    if (autonomousCommand != null) {
+      autonomousCommand.cancel();
+    }
+  }
 
   /** This function is called periodically during operator control. */
   @Override
@@ -134,7 +189,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when test mode is enabled. */
   @Override
-  public void testInit() {}
+  public void testInit() {
+    CommandScheduler.getInstance().cancelAll();
+  }
 
   /** This function is called periodically during test mode. */
   @Override
