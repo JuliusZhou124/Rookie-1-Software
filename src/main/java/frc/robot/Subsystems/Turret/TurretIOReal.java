@@ -2,6 +2,7 @@ package frc.robot.Subsystems.Turret;
 
 // imports libraries
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -19,7 +20,7 @@ public class TurretIOReal implements TurretIO{
     private final TalonFX turretMotor = new TalonFX(0, "canivore");
     private final CANcoder turretEncoder = new CANcoder(0, "canivore");
     private final PositionVoltage request = new PositionVoltage(0).withSlot(0); //?
-
+    
     // instantiates the configuration (motor config - gear ratio, fwd, rev) of motor and encoder
     TalonFXConfiguration talonFXConfigs;
     CANcoderConfiguration canCoderConfigs;
@@ -35,6 +36,17 @@ public class TurretIOReal implements TurretIO{
         slot0Configs.kP = 2.4; // An error of 1 rotation results in 2.4 V output
         slot0Configs.kI = 0; // no output for integrated error
         slot0Configs.kD = 0.1; // A velocity of 1 rps results in 0.1 V output
+        turretMotor.getConfigurator().apply(slot0Configs);
+        
+        // enable stator current limit
+        var limitConfigs = new CurrentLimitsConfigs();
+        limitConfigs.StatorCurrentLimit = 20;
+        limitConfigs.StatorCurrentLimitEnable = true;
+        turretMotor.getConfigurator().apply(limitConfigs);
+
+        // initialization of the encoder configuration
+        canCoderConfigs = new CANcoderConfiguration();
+        turretEncoder.getConfigurator().apply(canCoderConfigs);
 
         CANcoderConfiguration cc_cfg = new CANcoderConfiguration(); // creates new CANcoderConfiguration
         cc_cfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf; // setting magnet absolute range
@@ -49,13 +61,6 @@ public class TurretIOReal implements TurretIO{
         fx_cfg.Feedback.RotorToSensorRatio = 60.0; // sets the ratio of the rotor and encoder (shaft of motor and encoder) 
 
         turretMotor.getConfigurator().apply(fx_cfg); // applies configuration
-
-        // applying pid configs to motor
-        turretMotor.getConfigurator().apply(slot0Configs);
-
-        // initialization of the encoder configuration
-        canCoderConfigs = new CANcoderConfiguration();
-        turretEncoder.getConfigurator().apply(canCoderConfigs);
     }
 
     // overrides the update to the actual value of the motors
