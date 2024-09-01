@@ -144,7 +144,7 @@ gversion {
 }
 
 // Spotless formatting
-project.compileJava.dependsOn(spotlessApply)
+//project.compileJava.dependsOn(spotlessApply)
 spotless {
     java {
         target fileTree(".") {
@@ -152,7 +152,7 @@ spotless {
             exclude "**/build/**", "**/build-*/**"
         }
         toggleOffOn()
-        googleJavaFormat()
+        //googleJavaFormat()
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()

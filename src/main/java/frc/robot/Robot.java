@@ -127,12 +127,13 @@ public class Robot extends LoggedRobot {
 
     // -- Controller button bindings --
     // does the commands when each button is pressed
-    m_driverController.a().onTrue(m_turret.randomCommand()); // x y a b 
+    m_driverController.a().onTrue(m_turret.randomCommand()); // x y a b
     m_driverController.x().onTrue(m_turret.leftCommand());
     m_driverController.y().onTrue(m_turret.zeroCommand());
-    m_driverController.b().onTrue(m_turret.rightCommand()); 
-    
-    // Auto Chooser Here. 
+    m_driverController.b().onTrue(m_turret.rightCommand());
+    m_driverController.rightBumper().onTrue(m_turret.fCommand());
+
+    // Auto Chooser Here.
   }
 
   /** This function is called periodically during all modes. */
@@ -203,5 +204,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    m_turret.simulationPeriodic();
+  }
 }

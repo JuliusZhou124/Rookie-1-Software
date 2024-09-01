@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -33,5 +34,17 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  // Constants that you pass in
+  public static class TurretConstants{
+    public static final double kMotorGearing = 60.0;
+
+    // simulation
+    public class Sim{
+      public static final double kP = 1;
+      public static final double kD = 0.00;
+      public static final double kV = 0.0;
+    }
   }
 }
