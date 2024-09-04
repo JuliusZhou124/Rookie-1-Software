@@ -29,6 +29,6 @@ public class TurretIOSim implements TurretIO{
 
     @Override
     public void setProfiled(double angle) {
-        
+
     }
 }

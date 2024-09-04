@@ -133,7 +133,7 @@ public class Robot extends LoggedRobot {
     m_driverController.x().onTrue(m_turret.leftCommand());
     m_driverController.y().onTrue(m_turret.zeroCommand());
     m_driverController.b().onTrue(m_turret.rightCommand());
-    m_driverController.a().toggleOnTrue(m_turret.fCommand(2).andThen(
+    m_driverController.a().whileTrue(m_turret.fCommand(2).andThen(
       Commands.runOnce(() -> Logger.recordOutput("bruh", 1))));
     // Auto Chooser Here.
   }

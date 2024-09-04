@@ -32,30 +32,30 @@ public class TurretSubsystem extends SubsystemBase{
     // 0 center, left negative, right positive
     // current*voltage = power
     public void setAngle(double radiansAngle) {
-        if (Math.abs(radiansAngle) <= radiansAngle) io.setProfiled(radiansAngle); // sets position for 
+        if (Math.abs(radiansAngle) <= radiansAngle) io.setProfiled(radiansAngle); // sets position for
     }
 
     public Command setAngleCommand(double angle) {
-        return this.runOnce(() -> setAngle(angle));
+        return this.run(() -> setAngle(angle));
     }
 
     public Command leftCommand() {
-        return this.runOnce(() -> setAngle(-turretAngleRadians));
+        return this.run(() -> setAngle(-turretAngleRadians));
     }
 
     public Command rightCommand() {
-        return this.runOnce(() -> setAngle(turretAngleRadians));
+        return this.run(() -> setAngle(turretAngleRadians));
     }
 
     public Command zeroCommand() {
-        return this.runOnce(() -> setAngle(0));
+        return this.run(() -> setAngle(0));
     }
 
     public Command randomCommand() {
-        return this.runOnce(() -> setAngle(Math.random()*2*turretAngleRadians + -turretAngleRadians));
+        return this.run(() -> setAngle(Math.random()*2*turretAngleRadians + -turretAngleRadians));
     }
 
     public Command fCommand(double voltage) {
-        return this.runOnce(() -> io.setVoltage(voltage));
+        return this.run(() -> io.setVoltage(voltage));
     }
 }
