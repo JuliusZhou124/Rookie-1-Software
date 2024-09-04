@@ -26,4 +26,9 @@ public class TurretIOSim implements TurretIO{
         this.voltage = voltage;
         sim.setInputVoltage(voltage);
     }
+
+    @Override
+    public void setProfiled(double angle) {
+        
+    }
 }

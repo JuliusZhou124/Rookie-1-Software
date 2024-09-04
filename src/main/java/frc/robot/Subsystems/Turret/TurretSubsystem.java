@@ -25,12 +25,14 @@ public class TurretSubsystem extends SubsystemBase{
     public void simulationPeriodic() {
         io.updateInputs(inputs); // gets inputs inputs from motor + updates them
         Logger.processInputs("Turret", inputs); // logs all the angles that the turret turns to
+        if (this.getCurrentCommand() != null )Logger.recordOutput("Current Turret Command", this.getCurrentCommand().getName());
+        else Logger.recordOutput("Current Turret Command", "OOps");
     }
 
     // 0 center, left negative, right positive
     // current*voltage = power
     public void setAngle(double radiansAngle) {
-        if (Math.abs(radiansAngle) <= radiansAngle) io.setProfiled(radiansAngle); // sets the voltage for the turret
+        if (Math.abs(radiansAngle) <= radiansAngle) io.setProfiled(radiansAngle); // sets position for 
     }
 
     public Command setAngleCommand(double angle) {
@@ -53,7 +55,7 @@ public class TurretSubsystem extends SubsystemBase{
         return this.runOnce(() -> setAngle(Math.random()*2*turretAngleRadians + -turretAngleRadians));
     }
 
-    public Command fCommand() {
-        return this.runOnce(() -> io.setVoltage(2));
+    public Command fCommand(double voltage) {
+        return this.runOnce(() -> io.setVoltage(voltage));
     }
 }

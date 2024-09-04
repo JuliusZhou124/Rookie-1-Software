@@ -120,19 +120,21 @@ public class Robot extends LoggedRobot {
 
     chooser.addOption("None", Commands.none());
 
+    Command funny = m_turret.fCommand(0);
+    funny.setName("fCommand");
     // Default Commands
-    m_turret.setDefaultCommand(m_turret.setAngleCommand(0));
+    m_turret.setDefaultCommand(funny);
 
     // State based triggers
 
     // -- Controller button bindings --
     // does the commands when each button is pressed
-    m_driverController.a().onTrue(m_turret.randomCommand()); // x y a b
+    //m_driverController.a().onTrue(m_turret.randomCommand()); // x y a b
     m_driverController.x().onTrue(m_turret.leftCommand());
     m_driverController.y().onTrue(m_turret.zeroCommand());
     m_driverController.b().onTrue(m_turret.rightCommand());
-    m_driverController.rightBumper().onTrue(m_turret.fCommand());
-
+    m_driverController.a().toggleOnTrue(m_turret.fCommand(2).andThen(
+      Commands.runOnce(() -> Logger.recordOutput("bruh", 1))));
     // Auto Chooser Here.
   }
 
